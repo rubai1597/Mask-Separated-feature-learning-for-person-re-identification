@@ -7,7 +7,7 @@ It is ready to summit to the conference. Please check the detailed structure and
 
 ## Architecture
 
-![](image\architecture.png){: width="50%"}
+<img src="image\architecture.png" width="50%">
 
 ## Results (Rank-1/mAP)
 

@@ -2,12 +2,21 @@
 
 A simple but effective structure for person re-identification.
 
-It is ready to summit to the conference. Please check the detailed structure and experiment results in "paper.pdf".
-
 
 ## Architecture
 
-<img src="image\architecture.png" width="80%">
+![](image\architecture.png){: width="50%"}
+
+## Requirements
+We use the 'amp' package which supports automatic mixed precision. You can downloads the package in [here!](https://github.com/NVIDIA/apex)
+
+After install amp, 
+```
+$ conda create -n msreid python==3.7 -y
+$ conda install pytorch torchvision cudatoolkit -c pytorch
+$ pip install -r requirements.txt
+```
+
 
 ## Results (Rank-1/mAP)
 

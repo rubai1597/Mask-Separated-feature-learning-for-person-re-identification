@@ -24,7 +24,7 @@ def make_loss(args, num_classes):
 
     def loss_func(score, feat, target, mask=False):
         losses = {}
-        losses["X-entropy"] = xent_criterion(score / args.temperature, target)
+        losses["X-entropy"] = xent_criterion(score, target)
         if feat is None:
             return losses
 

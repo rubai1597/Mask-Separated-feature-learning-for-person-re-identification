@@ -170,7 +170,6 @@ class MSReID(nn.Module):
     def forward(self, x, labels=None):
         B = x.size(0)
 
-        # baseline_1024
         x = self.input_layer(x)
 
         x = self.layer1(x)
@@ -219,6 +218,6 @@ class MSReID(nn.Module):
             local_bn_feat = self.local_bottleneck(local_feat)
             local_cls_score = self.local_classifier(local_bn_feat)
 
-            return [global_cls_score, local_cls_score], [global_feat, local_feat], global_mask, local_mask
+            return [global_cls_score, local_cls_score], [global_feat, local_feat]
         else:
-            return [global_cls_score], [global_feat], global_mask, local_mask
+            return [global_cls_score], [global_feat]

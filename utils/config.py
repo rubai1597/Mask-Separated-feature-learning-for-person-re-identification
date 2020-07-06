@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from utils.common import readable_directory, positive_int, nonnegative_int, positive_float, probability
+from .common import readable_directory, positive_int, nonnegative_int, positive_float, probability
 
 
 def argument_parsing():
@@ -26,9 +26,9 @@ def argument_parsing():
                         help="The probability of random erasing.")
 
     # data loader
-    parser.add_argument("--dataset_name", default='market1501', type=str, choices=['market1501', 'dukemtmc',
-                                                                                   'cuhk03-D', 'cuhk03-L'])
-    parser.add_argument("--dataset_root", default='/workdir/jinbeom/dataset/reid', type=readable_directory,
+    parser.add_argument("--dataset_name", default="market1501", type=str, choices=["market1501", "dukemtmc",
+                                                                                   "cuhk03-D", "cuhk03-L"])
+    parser.add_argument("--dataset_root", default="/mnt/nas59_data/reID", type=readable_directory,
                         help="The root directory of datasets.\n"
                              "Data would be loaded with os.path.join(args.dataset_root, args.dataset_name)")
     parser.add_argument("--num_workers", default=8, type=positive_int)
@@ -36,9 +36,9 @@ def argument_parsing():
     parser.add_argument("--num_instance", default=3, type=positive_int)
 
     # model settings
-    parser.add_argument("--model_name", default='msreid', type=str, choices=['msreid'])
-    parser.add_argument("--backbone", default='resnet50', type=str, choices=['resnet50'])
-    parser.add_argument("--backbone_pretrain", default='./resnet50-19c8e357.pth')
+    parser.add_argument("--model_name", default="msreid", type=str, choices=["msreid"])
+    parser.add_argument("--backbone", default="resnet50", type=str, choices=["resnet50"])
+    parser.add_argument("--backbone_pretrain", default="./resnet50-19c8e357.pth")
     parser.add_argument("--triplet_dim", default=1536, type=positive_int)
 
     parser.add_argument("--use_attn", default=False, action="store_true")
@@ -46,11 +46,11 @@ def argument_parsing():
     parser.add_argument("--use_local_feat", default=False, action="store_true")
 
     # training settings
-    parser.add_argument("--save_dir", default='outputs', type=str)
-    parser.add_argument("--pretrain", default='', type=str)
+    parser.add_argument("--save_dir", default="outputs", type=str)
+    parser.add_argument("--pretrain", default="", type=str)
     parser.add_argument("--resume", default=False, action="store_true")
 
-    parser.add_argument("--optimizer", default='adam', type=str, choices=['sgd', 'adam'])
+    parser.add_argument("--optimizer", default="adam", type=str, choices=["sgd", "adam"])
     parser.add_argument("--amsgrad", default=False, action="store_true")
     parser.add_argument("--momentum", default=0.9, type=positive_float)
 

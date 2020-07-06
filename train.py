@@ -54,16 +54,21 @@ def train(args):
                     if isinstance(v, torch.Tensor):
                         state[k] = v.cuda()
 
-    model = nn.DataParallel(model)
+    model_state_dict = model.state_dict()
+    optim_state_dict = optimizer.state_dict()
+    if args.center_loss:
+        optim_center_state_dict = optimizer_center.state_dict()
+        center_state_dict = center_criterion.state_dict()
+
     reid_evaluator = ReIDEvaluator(args, model, num_query)
 
     start_epoch = 0
     global_step = 0
     if args.pretrain != '':  # load pre-trained model
         weights = torch.load(args.pretrain)
-        state_dict = weights["state_dict"]
+        model_state_dict = weights["state_dict"]
 
-        model.load_state_dict(state_dict)
+        model.load_state_dict(model_state_dict)
         if args.center_loss:
             center_criterion.load_state_dict(
                 torch.load(args.pretrain.replace('model', 'center_param'))["state_dict"])
@@ -103,7 +108,7 @@ def train(args):
 
     def summary_loss(score, feat, labels, top_name='global'):
         loss = 0.0
-        losses = loss_fn(score, feat, labels)
+        losses = loss_fn(score, feat, labels, mask=True if top_name == "local" else False)
         for loss_name, loss_val in losses.items():
             if loss_name.lower() == "accuracy":
                 summary_writer.add_scalar(f"Score/{top_name}/triplet", loss_val, global_step)
@@ -123,6 +128,19 @@ def train(args):
 
         return loss
 
+    def save_weights(file_name, eph, steps):
+        torch.save({"state_dict": model_state_dict,
+                    "epoch": eph + 1,
+                    "global_step": steps},
+                   file_name)
+        torch.save({"state_dict": optim_state_dict},
+                   file_name.replace("model", "optimizer"))
+        if args.center_loss:
+            torch.save({"state_dict": center_state_dict},
+                       file_name.replace("model", "optimizer_center"))
+            torch.save({"state_dict": optim_state_dict},
+                       file_name.replace("model", "center_param"))
+
     # training start
     for epoch in range(start_epoch, args.max_epoch):
         model.train()
@@ -132,11 +150,11 @@ def train(args):
                 inputs = inputs.cuda()
                 labels = labels.cuda()
 
-            cls_scores, features, _, _ = model(inputs, labels)
+            cls_scores, features = model(inputs, labels)
 
             # losses
             total_loss = summary_loss(cls_scores[0], features[0], labels, 'global')
-            if len(cls_scores) == 2:
+            if args.use_local_feat:
                 total_loss += summary_loss(cls_scores[1], features[1], labels, 'local')
 
             optimizer.zero_grad()
@@ -201,37 +219,14 @@ def train(args):
                 best_mAP = mAP
                 best_epoch = epoch + 1
 
-            model_state_dict = model.state_dict()
-            optim_state_dict = optimizer.state_dict()
-            if args.center_loss:
-                optim_center_state_dict = optimizer_center.state_dict()
-                center_state_dict = center_criterion.state_dict()
-
             if (epoch + 1) % args.save_period == 0 or (epoch + 1) == args.max_epoch:
-                pth_file_name = f"{args.backbone}_model_{epoch + 1}.pth.tar"
-                torch.save({"state_dict": model_state_dict,
-                            "epoch": epoch + 1, "global_step": global_step},
-                           os.path.join(model_save_dir, pth_file_name))
-                torch.save({"state_dict": optim_state_dict},
-                           os.path.join(model_save_dir, pth_file_name.replace("model", "optimizer")))
-                if args.center_loss:
-                    torch.save({"state_dict": optim_center_state_dict},
-                               os.path.join(model_save_dir, pth_file_name.replace("model", "optimizer_center")))
-                    torch.save({"state_dict": center_state_dict},
-                               os.path.join(model_save_dir, pth_file_name.replace("model", "center_param")))
+                pth_file_name = os.path.join(model_save_dir, f"{args.backbone}_model_{epoch + 1}.pth.tar")
+                save_weights(pth_file_name, eph=epoch, steps=global_step)
+
             if is_best:
-                pth_file_name = f"{args.backbone}_model_best.pth.tar"
-                torch.save({"state_dict": model_state_dict,
-                            "epoch": epoch + 1, "global_step": global_step,
-                            "best_rank1": best_rank1},
-                           os.path.join(model_save_dir, pth_file_name))
-                torch.save({"state_dict": optim_state_dict},
-                           os.path.join(model_save_dir, pth_file_name.replace("model", "optimizer")))
-                if args.center_loss:
-                    torch.save({"state_dict": optim_center_state_dict},
-                               os.path.join(model_save_dir, pth_file_name.replace("model", "optimizer_center")))
-                    torch.save({"state_dict": center_state_dict},
-                               os.path.join(model_save_dir, pth_file_name.replace("model", "center_param")))
+                pth_file_name = os.path.join(model_save_dir, f"{args.backbone}_model_best.pth.tar")
+                save_weights(pth_file_name, eph=epoch, steps=global_step)
+
         # end epoch
         current_epoch += 1
 

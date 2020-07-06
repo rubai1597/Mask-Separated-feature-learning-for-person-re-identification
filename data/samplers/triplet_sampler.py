@@ -24,6 +24,7 @@ class RandomIdentitySampler(Sampler):
     """
 
     def __init__(self, data_source, batch_size, num_instances):
+        super().__init__(data_source)
         self.data_source = data_source
         self.batch_size = batch_size
         self.num_instances = num_instances

@@ -2,7 +2,6 @@ import os
 import math
 import numpy as np
 from argparse import ArgumentTypeError
-from matplotlib import cm
 
 
 def check_directory(arg, access=os.W_OK, access_str="writeable"):

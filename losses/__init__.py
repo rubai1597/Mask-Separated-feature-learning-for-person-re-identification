@@ -22,7 +22,7 @@ def make_loss(args, num_classes):
     else:
         center_criterion = None
 
-    def loss_func(score, feat, target, mask=False):
+    def loss_func(score, feat, target):
         losses = {}
         losses["X-entropy"] = xent_criterion(score, target)
         if feat is None:
@@ -39,7 +39,7 @@ def make_loss(args, num_classes):
             losses["dist_ap"] = dist_ap
             losses["dist_an"] = dist_an
         if args.center_loss:
-            losses["Center"] = args.center_loss_weight * center_criterion(feat, target, mask)
+            losses["Center"] = args.center_loss_weight * center_criterion(feat, target)
         return losses
 
     return loss_func, center_criterion

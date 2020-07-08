@@ -4,8 +4,7 @@ A simple but effective structure for person re-identification.
 
 
 ## Architecture
-
-<image src="image/architecture.png" width="900">
+<img src="image/architecture.png" width="900">
 
 ## Requirements
 We use the 'amp' package which supports automatic mixed precision. You can downloads the package in [here!](https://github.com/NVIDIA/apex)

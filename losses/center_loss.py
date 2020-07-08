@@ -22,9 +22,8 @@ class CenterLoss(nn.Module):
         self.use_gpu = use_gpu
 
         self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim), requires_grad=True)
-        self.mask_centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim), requires_grad=True)
 
-    def forward(self, x, labels, mask=False):
+    def forward(self, x, labels):
         """
         Args:
             x: feature matrix with shape (batch_size, feat_dim).
@@ -32,31 +31,19 @@ class CenterLoss(nn.Module):
         """
         assert x.size(0) == labels.size(0), "features.size(0) is not equal to labels.size(0)"
 
-        centers = self.mask_centers if mask else self.centers
+        centers = self.centers
 
         batch_size = x.size(0)
-        distmat = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(batch_size, self.num_classes) + \
-                  torch.pow(centers, 2).sum(dim=1, keepdim=True).expand(self.num_classes, batch_size).t()
-        distmat.addmm_(1, -2, x, centers.t())
+        distmat = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(batch_size, self.num_classes)
+        distmat = distmat + torch.pow(centers, 2).sum(dim=1, keepdim=True).expand(self.num_classes, batch_size).t()
+        distmat = torch.addmm(distmat, x, centers.t(), beta=1, alpha=-2)
 
         classes = torch.arange(self.num_classes).long()
-        if self.use_gpu: classes = classes.cuda()
+        if self.use_gpu:
+            classes = classes.cuda()
         labels = labels.unsqueeze(1).expand(batch_size, self.num_classes)
         mask = labels.eq(classes.expand(batch_size, self.num_classes))
 
         dist = distmat * mask.float()
         loss = dist.clamp(min=1e-12, max=1e+12).sum() / batch_size
         return loss
-
-
-if __name__ == '__main__':
-    use_gpu = False
-    center_loss = CenterLoss(use_gpu=use_gpu)
-    features = torch.rand(16, 2048)
-    targets = torch.Tensor([0, 1, 2, 3, 2, 3, 1, 4, 5, 3, 2, 1, 0, 0, 5, 4]).long()
-    if use_gpu:
-        features = torch.rand(16, 2048).cuda()
-        targets = torch.Tensor([0, 1, 2, 3, 2, 3, 1, 4, 5, 3, 2, 1, 0, 0, 5, 4]).cuda()
-
-    loss = center_loss(features, targets)
-    print(loss)

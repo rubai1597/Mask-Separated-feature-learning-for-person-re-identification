@@ -6,7 +6,6 @@ from datetime import datetime
 from apex import amp
 
 import torch
-from torch import nn
 from torch.backends import cudnn
 from torch.utils.tensorboard import SummaryWriter
 
@@ -108,7 +107,7 @@ def train(args):
 
     def summary_loss(score, feat, labels, top_name='global'):
         loss = 0.0
-        losses = loss_fn(score, feat, labels, mask=True if top_name == "local" else False)
+        losses = loss_fn(score, feat, labels)
         for loss_name, loss_val in losses.items():
             if loss_name.lower() == "accuracy":
                 summary_writer.add_scalar(f"Score/{top_name}/triplet", loss_val, global_step)
@@ -138,7 +137,7 @@ def train(args):
         if args.center_loss:
             torch.save({"state_dict": center_state_dict},
                        file_name.replace("model", "optimizer_center"))
-            torch.save({"state_dict": optim_state_dict},
+            torch.save({"state_dict": optim_center_state_dict},
                        file_name.replace("model", "center_param"))
 
     # training start

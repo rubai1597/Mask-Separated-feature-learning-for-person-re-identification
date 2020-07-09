@@ -27,7 +27,8 @@ def argument_parsing():
 
     # data loader
     parser.add_argument("--dataset_name", default="market1501", type=str, choices=["market1501", "dukemtmc",
-                                                                                   "cuhk03-D", "cuhk03-L"])
+                                                                                   "cuhk03-D", "cuhk03-L",
+                                                                                   "cub200"])
     parser.add_argument("--dataset_root", default="/mnt/nas59_data/reID", type=readable_directory,
                         help="The root directory of datasets.\n"
                              "Data would be loaded with os.path.join(args.dataset_root, args.dataset_name)")

@@ -11,8 +11,6 @@ def make_optimizer(args, model, center_criterion):
         if "bias" in key:
             lr = args.base_lr * args.bias_lr_factor
             weight_decay = args.bias_weight_decay
-        if ("feat_weight" in key) or ("gap_weight" in key) or ("gmp_weight" in key):
-            lr = args.feat_weight_lr
 
         params += [{"params": [value], "lr": lr, "initial_lr": lr, "weight_decay": weight_decay}]
     if args.optimizer == 'sgd':

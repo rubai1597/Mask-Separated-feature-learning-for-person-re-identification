@@ -15,13 +15,13 @@ def make_data_loader(args):
 		ImageDataset(dataset.train, build_transforms(args, is_train=True)),
 		batch_size=args.batch_size,
 		sampler=RandomIdentitySampler(dataset.train, args.batch_size, args.num_instance),
-		num_workers=args.num_workers,
+		num_workers=0,
 		collate_fn=collate_fn,
 		drop_last=True
 	)
 	val_loader = DataLoader(
 		ImageDataset(dataset.query + dataset.gallery, build_transforms(args, is_train=False)),
-		batch_size=args.batch_size // 2,
+		batch_size=args.batch_size // 4,
 		shuffle=False,
 		num_workers=args.num_workers,
 		collate_fn=collate_fn

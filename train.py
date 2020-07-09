@@ -84,7 +84,7 @@ def train(args):
 
     scheduler = WarmupMultiStepLR(optimizer, args.steps, args.gamma,
                                   args.warmup_factor, args.warmup_step, "linear",
-                                  start_epoch)
+                                  -1 if start_epoch == 0 else start_epoch)
 
     current_epoch = start_epoch
     best_epoch = 0
@@ -197,11 +197,10 @@ def train(args):
             global_step += 1
 
         print(f"Epoch: [{epoch}]\tEpoch Time {batch_time.sum:.3f} s\tLoss {total_losses.mean:.3f}\tLr {current_lr:.2e}")
-        # update learning rate
-        scheduler.step()
 
         if args.eval_period > 0 and (epoch + 1) % args.eval_period == 0 or (epoch + 1) == args.max_epoch:
-            rank, mAP = reid_evaluator.evaluate(val_loader)
+            rank, mAP = reid_evaluator.evaluate(val_loader,
+                                                mode="retrieval" if args.dataset_name=="cub200" else "reid")
 
             rank_string = ""
             for r in (1, 2, 4, 5, 8, 10, 16, 20):
@@ -232,6 +231,9 @@ def train(args):
         batch_time.reset()
         total_losses.reset()
         torch.cuda.empty_cache()
+
+        # update learning rate
+        scheduler.step()
 
     print(f"Best rank-1 {best_rank1:.1%}, achived at epoch {best_epoch}")
     summary_writer.add_hparams({"dataset_name": args.dataset_name,

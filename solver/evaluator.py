@@ -9,10 +9,13 @@ class ReIDEvaluator(object):
         self.num_query = num_query
         self.test_norm = args.test_norm
 
-    def evaluate(self, val_loader, ranks=(1, 2, 4, 5, 8, 10, 16, 20)):
+    def evaluate(self, val_loader, ranks=(1, 2, 4, 5, 8, 10, 16, 20), mode="reid"):
         distmat, (_, q_pids, q_camids, _), (_, g_pids, g_camids, _) = self._eval_base(val_loader)
 
         print("Computing CMC and mAP")
+        if mode != "reid":
+            boolean_mask = torch.eye(self.num_query, dtype=torch.bool, device=distmat.device)
+            distmat = distmat[~boolean_mask].view(self.num_query, -1)
         cmc, mAP = self.eval_func(distmat, q_pids, g_pids, q_camids, g_camids)
 
         print("Results ----------")

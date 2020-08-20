@@ -19,10 +19,9 @@ $ pip install -r requirements.txt
 
 ## Results (Rank-1/mAP)
 
-|    Dataset    | Rank-1/mAP  |
-| :-----------: | :---------: |
-|  Market1501   | 95.8%/88.8% |
-| DukeMTMC-reID | 90.2%/80.6% |
-|   CUHK03-L    | 84.6%/81.9% |
-|   CUHK03-D    | 82.7%/79.5% |
-
+|    Dataset    | Rank-1/mAP  | ckpts  |
+| :-----------: | :---------: | :----: |
+|  Market1501   | 96.1%/88.9% |  file(https://www.dropbox.com/s/98v7d4cy5n17qt9/market1501_ALM_resnet50_model_best.pth.tar?dl=0)  |
+| DukeMTMC-reID | 90.2%/80.6% |  file(https://www.dropbox.com/s/x0dt1n2q3aljqcn/dukemtmc_ALM_resnet50_model_best.pth.tar?dl=0)  |
+|   CUHK03-L    | 86.1%/83.0% |  file(https://www.dropbox.com/s/ur4es2ngbs5bh3s/cuhk_L_ALM_resnet50_model_best.pth.tar?dl=0)  |
+|   CUHK03-D    | 84.2%/80.3% |  None  |
